@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useQuery } from "@vue/apollo-composable";
-import gql from "graphql-tag";
+import ALL_BOOKS_QUERY from "./graphql/allBooks.query.gql";
 
 type Book = {
   id: string;
@@ -14,16 +14,6 @@ type Book = {
 type Books = {
   allBooks: Book[];
 };
-
-const ALL_BOOKS_QUERY = gql`
-  query AllBooks {
-    allBooks {
-      id
-      title
-      rating
-    }
-  }
-`;
 
 // ref. https://v4.apollo.vuejs.org/api/use-query.html https://issuecloser.com/blog/getting-started-with-vue-query-and-typescript
 //
