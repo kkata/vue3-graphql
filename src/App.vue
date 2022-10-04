@@ -1,31 +1,45 @@
 <script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import HelloWorld from './components/HelloWorld.vue'
+import { useQuery } from "@vue/apollo-composable";
+import gql from "graphql-tag";
+
+type Book = {
+  id: string;
+  title: string;
+  description: string;
+  rating: number;
+  author: string;
+  year: number;
+};
+
+type Books = {
+  allBooks: Book[];
+};
+
+const ALL_BOOKS_QUERY = gql`
+  query AllBooks {
+    allBooks {
+      id
+      title
+      rating
+    }
+  }
+`;
+
+// ref. https://v4.apollo.vuejs.org/api/use-query.html https://issuecloser.com/blog/getting-started-with-vue-query-and-typescript
+//
+const { result, loading, error } = useQuery<Books, Error>(ALL_BOOKS_QUERY);
+
+console.log(result);
 </script>
 
 <template>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+    <p v-if="loading">Loading...</p>
+    <p v-if="error">Error: {{ error }}</p>
+    <p v-if="result" v-for="book in result.allBooks" :key="book.id">
+      {{ book.title }}
+    </p>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
-}
-</style>
+<style scoped></style>
