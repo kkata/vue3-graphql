@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import ALL_BOOKS_QUERY from "./graphql/allBooks.query.gql";
+import EditRating from "./components/EditRating.vue";
 
 type Book = {
   id: string;
@@ -17,6 +18,7 @@ type Books = {
 };
 
 const searchTerm = ref("");
+const activeBook = ref<Book | null>(null);
 
 // ref. https://v4.apollo.vuejs.org/api/use-query.html https://issuecloser.com/blog/getting-started-with-vue-query-and-typescript
 //
@@ -40,9 +42,20 @@ const books = computed(() => result.value?.allBooks ?? []);
     <p v-if="loading">Loading...</p>
     <p v-else-if="error">Error: {{ error }}</p>
     <template v-else>
-      <p v-if="result" v-for="book in books" :key="book.id">
-        {{ book.title }}
+      <p v-if="activeBook">
+        Update "{{ activeBook.title }}" rating:
+        <EditRating
+          :initialRating="activeBook.rating"
+          :bookId="activeBook.id"
+          @closeForm="activeBook = null"
+        />
       </p>
+      <template v-else>
+        <p v-for="book in books" :key="book.id">
+          {{ book.title }} - {{ book.rating }}
+          <button @click="activeBook = book">Edit rating</button>
+        </p>
+      </template>
     </template>
   </div>
 </template>
