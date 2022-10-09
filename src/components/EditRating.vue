@@ -37,8 +37,8 @@ onDone(() => {
     step="0.1"
     :disabled="loading"
     v-model="rating"
-    @keyup.enter="updateRating"
     @keyup.esc="$emit('closeForm')"
+    @keyup.enter="updateRating()"
   />
   <p v-if="loading">Updating...</p>
   <p v-if="error">{{ error }}</p>
