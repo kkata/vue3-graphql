@@ -36,7 +36,7 @@ const { mutate: addBook, onDone } = useMutation(ADD_BOOK_MUTATION, () => ({
       query: ALL_BOOKS_QUERY,
       variables: { search: props.search },
     });
-    if (!sourceData) return;
+    if (!sourceData || !response.data) return;
     const data = {
       allBooks: [...sourceData.allBooks, response.data.addBook],
     };
@@ -45,6 +45,13 @@ const { mutate: addBook, onDone } = useMutation(ADD_BOOK_MUTATION, () => ({
       query: ALL_BOOKS_QUERY,
       variables: { search: props.search },
     });
+  },
+  optimisticResponse: {
+    addBook: {
+      __typename: "Book",
+      id: -1,
+      ...newBook,
+    },
   },
 }));
 
