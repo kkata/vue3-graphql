@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import ALL_BOOKS_QUERY from "./graphql/allBooks.query.gql";
+import BOOK_SUBSCRIPTION from "./graphql/newBook.subscription.gql";
 import EditRating from "./components/EditRating.vue";
 import AddBook from "./components/AddBook.vue";
 
@@ -18,13 +19,21 @@ type Books = {
   allBooks: Book[];
 };
 
+type BookSubscription = {
+  newBook: Book;
+};
+
+type BookSubscriptionVariables = {
+  bookSub: Book;
+};
+
 const searchTerm = ref("");
 const activeBook = ref<Book | null>(null);
 const showNewBookForm = ref(false);
 
 // ref. https://v4.apollo.vuejs.org/api/use-query.html https://issuecloser.com/blog/getting-started-with-vue-query-and-typescript
 //
-const { result, loading, error } = useQuery<Books>(
+const { result, loading, error, subscribeToMore } = useQuery<Books>(
   ALL_BOOKS_QUERY,
   () => ({
     search: searchTerm.value,
@@ -34,6 +43,19 @@ const { result, loading, error } = useQuery<Books>(
     // enabled: searchTerm.value.length > 2,
   })
 );
+
+subscribeToMore<BookSubscription, BookSubscriptionVariables>(() => ({
+  document: BOOK_SUBSCRIPTION,
+  updateQuery(previousResult, newResult) {
+    const res = {
+      allBooks: [
+        ...previousResult.allBooks,
+        newResult.subscriptionData.data.bookSub,
+      ],
+    };
+    return res;
+  },
+}));
 
 const books = computed(() => result.value?.allBooks ?? []);
 </script>
