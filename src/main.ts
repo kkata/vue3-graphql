@@ -9,8 +9,7 @@ import { getMainDefinition } from "@apollo/client/utilities";
 
 import { DefaultApolloClient } from "@vue/apollo-composable";
 
-// FIXME: WebSocketLinkは非推奨だけどサーバー側でSubscriptionsが実装されていないので使う
-// importするとVSCodeで型エラーが出る
+// MEMO: WebSocketLinkは非推奨だけどサーバー側がgraphql-wsによるSubscriptions実装ではないので使う
 import { WebSocketLink } from "@apollo/client/link/ws";
 // 本来は以下を使いたい
 // import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
