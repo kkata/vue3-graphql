@@ -6,6 +6,8 @@ import {
   split,
 } from "@apollo/client/core";
 import { getMainDefinition } from "@apollo/client/utilities";
+import typeDefs from "./graphql/typeDefs.gql";
+import FAVORITE_BOOKS_QUERY from "./graphql/favoriteBooks.query.gql";
 
 import { DefaultApolloClient } from "@vue/apollo-composable";
 
@@ -49,9 +51,24 @@ const splitLink = split(
 
 const cache = new InMemoryCache();
 
+cache.writeQuery({
+  query: FAVORITE_BOOKS_QUERY,
+  data: {
+    favoriteBooks: [
+      {
+        __typename: "Book",
+        title: "My favorite book",
+        id: 1234,
+        rating: 5,
+      },
+    ],
+  },
+});
+
 const apolloClient = new ApolloClient({
   link: splitLink,
   cache,
+  typeDefs,
   connectToDevTools: true,
 });
 

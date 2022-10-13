@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import { useQuery } from "@vue/apollo-composable";
 import ALL_BOOKS_QUERY from "./graphql/allBooks.query.gql";
 import BOOK_SUBSCRIPTION from "./graphql/newBook.subscription.gql";
+import FAVORITE_BOOK_QUERY from "./graphql/favoriteBooks.query.gql";
 import EditRating from "./components/EditRating.vue";
 import AddBook from "./components/AddBook.vue";
 
@@ -25,6 +26,10 @@ type BookSubscription = {
 
 type BookSubscriptionVariables = {
   bookSub: Book;
+};
+
+type FavoriteBooks = {
+  favoriteBooks: Book[];
 };
 
 const searchTerm = ref("");
@@ -58,6 +63,8 @@ subscribeToMore<BookSubscription, BookSubscriptionVariables>(() => ({
 }));
 
 const books = computed(() => result.value?.allBooks ?? []);
+
+const { result: favBooksResult } = useQuery<FavoriteBooks>(FAVORITE_BOOK_QUERY);
 </script>
 
 <template>
@@ -74,24 +81,49 @@ const books = computed(() => result.value?.allBooks ?? []);
     </div>
     <input type="text" v-model="searchTerm" />
     <p v-if="loading">Loading...</p>
-    <p v-else-if="error">Error: {{ error }}</p>
+    <p v-else-if="error">Something went wrong! Please try again</p>
     <template v-else>
       <p v-if="activeBook">
         Update "{{ activeBook.title }}" rating:
         <EditRating
-          :initialRating="activeBook.rating"
-          :bookId="activeBook.id"
+          :initial-rating="activeBook.rating"
+          :book-id="activeBook.id"
           @closeForm="activeBook = null"
         />
       </p>
       <template v-else>
-        <p v-for="book in books" :key="book.id">
-          {{ book.title }} - {{ book.rating }}
-          <button @click="activeBook = book">Edit rating</button>
-        </p>
+        <section class="list-wrapper">
+          <div class="list">
+            <h3>All Books</h3>
+            <p v-for="book in books" :key="book.id">
+              {{ book.title }} - {{ book.rating }}
+              <button @click="activeBook = book">Edit rating</button>
+            </p>
+          </div>
+          <div class="list">
+            <h3>Favorite Books</h3>
+            <p
+              v-if="favBooksResult"
+              v-for="book in favBooksResult.favoriteBooks"
+              :key="book.id"
+            >
+              {{ book.title }}
+            </p>
+          </div>
+        </section>
       </template>
     </template>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.list-wrapper {
+  display: flex;
+  margin: 0 auto;
+  max-width: 960px;
+}
+
+.list {
+  width: 50%;
+}
+</style>
