@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { useQuery } from "@vue/apollo-composable";
+import { useQuery, useMutation } from "@vue/apollo-composable";
 import ALL_BOOKS_QUERY from "./graphql/allBooks.query.gql";
 import BOOK_SUBSCRIPTION from "./graphql/newBook.subscription.gql";
 import FAVORITE_BOOK_QUERY from "./graphql/favoriteBooks.query.gql";
+import ADD_BOOK_TO_FAVORITES_MUTATION from "./graphql/addBookToFavorites.mutation.gql";
 import EditRating from "./components/EditRating.vue";
 import AddBook from "./components/AddBook.vue";
 
-type Book = {
+export type Book = {
   id: string;
   title: string;
   description: string;
@@ -65,6 +66,10 @@ subscribeToMore<BookSubscription, BookSubscriptionVariables>(() => ({
 const books = computed(() => result.value?.allBooks ?? []);
 
 const { result: favBooksResult } = useQuery<FavoriteBooks>(FAVORITE_BOOK_QUERY);
+
+const { mutate: addBookToFavorites } = useMutation(
+  ADD_BOOK_TO_FAVORITES_MUTATION
+);
 </script>
 
 <template>
@@ -98,15 +103,14 @@ const { result: favBooksResult } = useQuery<FavoriteBooks>(FAVORITE_BOOK_QUERY);
             <p v-for="book in books" :key="book.id">
               {{ book.title }} - {{ book.rating }}
               <button @click="activeBook = book">Edit rating</button>
+              <button @click="addBookToFavorites({ book })">
+                Add to Favorites
+              </button>
             </p>
           </div>
           <div class="list">
             <h3>Favorite Books</h3>
-            <p
-              v-if="favBooksResult"
-              v-for="book in favBooksResult.favoriteBooks"
-              :key="book.id"
-            >
+            <p v-for="book in favBooksResult!.favoriteBooks" :key="book.id">
               {{ book.title }}
             </p>
           </div>

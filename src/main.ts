@@ -18,6 +18,8 @@ import { WebSocketLink } from "@apollo/client/link/ws";
 // import { createClient } from "graphql-ws";
 // ref. https://www.apollographql.com/docs/react/api/link/apollo-link-subscriptions/
 
+import type { Book } from "./App.vue";
+
 import "./style.css";
 import App from "./App.vue";
 
@@ -65,10 +67,31 @@ cache.writeQuery({
   },
 });
 
+const resolvers = {
+  Mutation: {
+    addBookToFavorites: (
+      _parent: any,
+      { book }: { book: Book },
+      { cache }: { cache: InMemoryCache }
+    ) => {
+      const data = cache.readQuery<{ favoriteBooks: Book[] }>({
+        query: FAVORITE_BOOKS_QUERY,
+      });
+      if (!data) return;
+      const newData = {
+        favoriteBooks: [...data.favoriteBooks, book],
+      };
+      cache.writeQuery({ query: FAVORITE_BOOKS_QUERY, data: newData });
+      return newData.favoriteBooks;
+    },
+  },
+};
+
 const apolloClient = new ApolloClient({
   link: splitLink,
   cache,
   typeDefs,
+  resolvers,
   connectToDevTools: true,
 });
 
